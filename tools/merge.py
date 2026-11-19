@@ -13,6 +13,8 @@ import glob, json, os, struct, sys, zipfile
 BASE = "base/carrot-client-26.2.jar"
 OUT = "build/oona-client-26.2.jar"
 LOGO_ENTRY = "assets/carrotclient/textures/gui/logo.png"
+ICON_ENTRY = "assets/carrotclient/icon.png"        # mod list icon
+LANG_ENTRY = "assets/carrotclient/lang/en_us.json"  # Controls screen category name etc.
 
 # visible text only; identifiers (com/carrot/..., carrotclient) are never touched
 RENAME = {
@@ -79,8 +81,10 @@ with zipfile.ZipFile(BASE) as base, zipfile.ZipFile(mods) as add, \
         if info.is_dir() or n == "fabric.mod.json":
             continue
         data = base.read(n)
-        if n == LOGO_ENTRY:
+        if n == LOGO_ENTRY or n == ICON_ENTRY:
             data = logo
+        elif n == LANG_ENTRY:
+            data = data.replace(b"Carrot Client", b"Oona")
         elif n.endswith(".class"):
             patched = rename_strings(data)
             renamed += patched != data
@@ -108,4 +112,4 @@ with zipfile.ZipFile(BASE) as base, zipfile.ZipFile(mods) as add, \
     out.writestr("fabric.mod.json", json.dumps(fm, indent=2))
 
 print("wrote", OUT, "|", len(seen) + 1, "entries |", len(nested), "bundled mods |",
-      renamed, "classes renamed | logo swapped")
+      renamed, "classes renamed | logo + icon + lang swapped")
