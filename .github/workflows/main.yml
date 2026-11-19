@@ -21,15 +21,13 @@ jobs:
         with:
           gradle-version: current
 
-      - name: Build carrotmods
+      - name: Build modules
         run: gradle build --no-daemon --stacktrace
 
-      - name: Merge into Carrot Client jar
+      - name: Build the Oona jar
         run: python3 tools/merge.py
 
       - uses: actions/upload-artifact@v4
         with:
-          name: carrot-client-plus
-          path: |
-            build/carrot-client-26.2-plus.jar
-            build/libs/carrotmods-*.jar
+          name: oona-client
+          path: build/oona-client-26.2.jar
