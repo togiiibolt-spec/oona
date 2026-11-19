@@ -15,6 +15,7 @@ public final class CarrotMods implements ClientModInitializer {
     private static final KeyMapping[] KEYS = new KeyMapping[Modules.ALL.size()];
     private static KeyMapping libraryKey;
     private static boolean comboHeld;
+    private static int titleTicks;
 
     @Override
     public void onInitializeClient() {
@@ -45,6 +46,11 @@ public final class CarrotMods implements ClientModInitializer {
     }
 
     private static void tick(Minecraft mc) {
+        // the game rewrites its own window title when the world or screen changes; put ours back
+        if (titleTicks++ % 100 == 0) {
+            Compat.call(Compat.get(mc, "getWindow"), new String[] {"setTitle"}, "Oona 26.2");
+        }
+
         for (int i = 0; i < KEYS.length; i++) {
             Modules.Entry e = Modules.ALL.get(i);
             while (KEYS[i].consumeClick()) {
