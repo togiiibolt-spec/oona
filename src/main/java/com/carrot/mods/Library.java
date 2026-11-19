@@ -82,7 +82,7 @@ final class Library {
             boolean on = (Boolean) cfg.getClass().getMethod("areShadersEnabled").invoke(cfg);
             if (!on) return "";
             Object name = cfg.getClass().getMethod("getShaderPackName").invoke(cfg);
-            return name instanceof java.util.Optional<?> o ? String.valueOf(o.orElse("")) : "";
+            return name instanceof java.util.Optional<?> o && o.isPresent() ? String.valueOf(o.get()) : "";
         } catch (Throwable t) {
             return "";
         }
