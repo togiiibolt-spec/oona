@@ -1,0 +1,55 @@
+plugins {
+    // unobfuscated MC (26.x) uses the non-remapping loom plugin id
+    id 'net.fabricmc.fabric-loom' version "${loom_version}"
+}
+
+// gradle.properties holds fabric_version=FILL; resolve the newest fabric-api build for this MC here
+def fabricApiVersion = {
+    String wanted = project.fabric_version
+    if (wanted != 'FILL') return wanted
+    String mc = project.minecraft_version
+    String xml = new URL('https://maven.fabricmc.net/net/fabricmc/fabric-api/fabric-api/maven-metadata.xml').text
+    List<String> all = (xml =~ /<version>([^<]+)<\/version>/).collect { it[1] as String }
+    List<String> hits = all.findAll { it.endsWith('+' + mc) }
+    if (hits.isEmpty()) {
+        throw new GradleException('no fabric-api build found for Minecraft ' + mc + '; set fabric_version in gradle.properties')
+    }
+    hits.sort { a, b ->
+        def x = a.split('\\+')[0].findAll(/\d+/)*.toInteger()
+        def y = b.split('\\+')[0].findAll(/\d+/)*.toInteger()
+        for (int i = 0; i < Math.min(x.size(), y.size()); i++) {
+            if (x[i] != y[i]) return x[i] <=> y[i]
+        }
+        return x.size() <=> y.size()
+    }
+    return hits.last()
+}.call()
+println 'fabric-api: ' + fabricApiVersion
+
+version = '1.0.0'
+group = 'com.carrot'
+
+base { archivesName = 'carrotmods' }
+
+repositories { mavenCentral() }
+
+dependencies {
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    implementation "net.fabricmc.fabric-api:fabric-api:${fabricApiVersion}"
+    // annotations only; the runtime copy ships inside fabric loader
+    compileOnly 'io.github.llamalad7:mixinextras-common:0.5.0'
+    // Carrot's own screen base for the library screen; present at runtime only in the merged jar
+    compileOnly files('base/carrot-client-26.2.jar')
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.release = 25
+    options.encoding = 'UTF-8'
+    options.compilerArgs += ['-Xlint:all', '-Xlint:-processing']
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
+}

@@ -1,0 +1,7 @@
+{
+  "required": false,
+  "package": "com.carrot.mods.mixin",
+  "compatibilityLevel": "JAVA_25",
+  "client": ["BlockMixin", "SodiumXrayMixin", "ModMenuMixin", "ScreenMixin"],
+  "injectors": { "defaultRequire": 0 }
+}
